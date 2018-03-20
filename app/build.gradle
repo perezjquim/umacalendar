@@ -31,6 +31,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.0'
     implementation 'net.sf.biweekly:biweekly:0.6.1'
     implementation 'com.github.perezjquim:sharedprefhelper:master-SNAPSHOT'
+    implementation 'com.github.perezjquim:uihelper:master-SNAPSHOT'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:2.2.2'

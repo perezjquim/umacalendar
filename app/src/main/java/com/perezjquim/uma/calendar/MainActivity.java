@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
 
+import static com.perezjquim.UIHelper.toast;
+
 public class MainActivity extends AppCompatActivity
 {
     private TextView field;
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity
             }
             catch (IOException e)
             {
+                toast(this,"Número mecanográfico inválido ou falta de conectividade!");
                 e.printStackTrace();
             }
             finally
