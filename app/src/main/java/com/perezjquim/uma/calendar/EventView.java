@@ -10,24 +10,27 @@ public class EventView extends LinearLayout
 {
     private TextView txtLabel;
     private TextView txtInfo;
-    private TextView txtDate;
 
-    public EventView(Context context, AttributeSet attrs, String label, String info, String date)
+    public EventView(Context context, AttributeSet attrs, String label, String tipo, String prof, String sala, String date)
     {
         super(context, attrs);
         init(context);
-        setLabel(label);
-        setInfo(info);
-        setDate(date);
+        setLabel(label + " - " + tipo);
+        setInfo(
+                prof+"\n"+
+                sala+"\n"+
+                date);
     }
 
-    public EventView(Context context, String label, String info, String date)
+    public EventView(Context context, String label, String tipo, String prof, String sala, String date)
     {
         super(context);
         init(context);
-        setLabel(label);
-        setInfo(info);
-        setDate(date);
+        setLabel(label + " - " + tipo);
+        setInfo(
+                prof+"\n"+
+                        sala+"\n"+
+                        date);
     }
 
     public EventView(Context context, AttributeSet attrs)
@@ -49,10 +52,6 @@ public class EventView extends LinearLayout
     {
         txtInfo.setText(info);
     }
-    public void setDate(String date)
-    {
-        txtDate.setText(date);
-    }
 
     private void init(Context c)
     {
@@ -63,11 +62,8 @@ public class EventView extends LinearLayout
         txtLabel.setTextSize(30);
         txtInfo = new TextView(c);
         txtInfo.setTextSize(20);
-        txtDate = new TextView(c);
-        txtDate.setTextSize(20);
         addView(txtLabel);
         addView(txtInfo);
-        addView(txtDate);
     }
 }
 /*

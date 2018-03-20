@@ -6,6 +6,7 @@ import android.widget.LinearLayout;
 
 import com.perezjquim.SharedPreferencesHelper;
 
+import java.util.Calendar;
 import java.util.List;
 
 import biweekly.Biweekly;
@@ -24,17 +25,26 @@ public class ResultsActivity extends AppCompatActivity {
         prefs = new SharedPreferencesHelper(this);
         lay = findViewById(R.id.lay);
         String s = prefs.getString("misc","events");
-        System.out.println(s);
         ICalendar ical = Biweekly.parse(s).first();
         List<VEvent> events = ical.getEvents();
+        long today = Calendar.getInstance().getTimeInMillis();
         for(VEvent e : events)
         {
-            String label = e.getSummary().getValue();
-            String info = e.getLocation().getValue();
-            String date = e.getDateStart().getValue().getRawComponents().toDate().toString();
-            EventView out = new EventView(this,label,info,date);
-            runOnUiThread(()->
-                    lay.addView(out));
+            long eventDate = e.getDateStart().getValue().getTime();
+            if(today <= eventDate)
+            {
+                String cadeira = e.getSummary().getValue();
+                String[] info = e.getLocation().getValue().split(" -> ");
+                String sala = info[0];
+                info = info[1].split("[\\(\\)]");
+                String tipo = info[0];
+                String prof = info[1];
+                String date = e.getDateStart().getValue().getRawComponents().toDate().toString();
+                EventView out = new EventView(this,cadeira,tipo,prof,sala,date);
+                out.setPadding(10,10,10,10);
+                runOnUiThread(()->
+                        lay.addView(out));
+            }
         }
 
     }

@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="center"
-        android:id="@+id/lay">
+        android:id="@+id/lay"
+        android:padding="10dp">
     </LinearLayout>
 
 </ScrollView>
