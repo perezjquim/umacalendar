@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity
         field = findViewById(R.id.field);
         queue = Volley.newRequestQueue(this);
         progress = findViewById(R.id.progress);
+        list = findViewById(R.id.lay);
     }
     public void requestCalendar(View v)
     {
@@ -68,15 +70,7 @@ public class MainActivity extends AppCompatActivity
             }
             List<VEvent> events = ical.getEvents();
 
-            for(VEvent e : events)
-            {
-                System.out.println("-- EVENTO -- ");
-                System.out.println(e.toString());
-                System.out.println("Aula: " + e.getSummary().getValue());
-                System.out.println("Date start: " + e.getDateStart().getValue().getRawComponents().getHour());
-                System.out.println("Date end: " + e.getDateEnd().getValue());
-                System.out.println("-- --- -- ");
-            }
+
            /* try {
                 JSONArray array = new JSONArray(ical.writeJson());
                 ical.w
@@ -92,6 +86,18 @@ public class MainActivity extends AppCompatActivity
             toast(this,"ola");
             runOnUiThread(()->
             {
+                for(VEvent e : events)
+                {
+                    TextView t = new TextView(this);
+                    t.setText( e.getSummary().getValue());
+                    list.addView(t);
+                    System.out.println("-- EVENTO -- ");
+                    System.out.println(e.toString());
+                    System.out.println("Aula: " + e.getSummary().getValue());
+                    System.out.println("Date start: " + e.getDateStart().getValue().getRawComponents().getHour());
+                    System.out.println("Date end: " + e.getDateEnd().getValue());
+                    System.out.println("-- --- -- ");
+                }
                 progress.setVisibility(View.GONE);
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             });
