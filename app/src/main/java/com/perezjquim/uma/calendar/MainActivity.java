@@ -1,20 +1,14 @@
 package com.perezjquim.uma.calendar;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
-
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,14 +19,10 @@ import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
 
-import static com.perezjquim.util.UIHelper.toast;
-
 public class MainActivity extends AppCompatActivity
 {
     private TextView console;
     private TextView field;
-    private RequestQueue queue;
-    private ProgressBar progress;
     private LinearLayout list;
     private Dialog dialog;
 
@@ -43,8 +33,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         console = findViewById(R.id.console);
         field = findViewById(R.id.field);
-        queue = Volley.newRequestQueue(this);
-        progress = findViewById(R.id.progress);
         list = findViewById(R.id.lay);
         dialog = new Dialog(this,R.style.TransparentProgressDialog);
         dialog.setCancelable(false);
@@ -55,28 +43,27 @@ public class MainActivity extends AppCompatActivity
         new Thread(()->
         {
             runOnUiThread(()->
-            {
-               dialog.show();
-            });
+                    dialog.show());
 
             try
             {
                 InputStream is = new URL("http://calendar.uma.pt/"+field.getText()).openStream();
                 ICalendar ical = Biweekly.parse(is).first();
                 List<VEvent> events = ical.getEvents();
-                for(VEvent e : events)
+                Intent i = new Intent(this,ResultsActivity.class);
+                /*for(VEvent e : events)
                 {
                     TextView t = new TextView(this);
                     t.setText(e.getSummary().getValue());
-                    runOnUiThread(()-> list.addView(t));
+                    runOnUiThread(()->
+                            list.addView(t));
                     System.out.println("-- EVENTO -- ");
                     System.out.println(e.toString());
                     System.out.println("Aula: " + e.getSummary().getValue());
                     System.out.println("Date start: " + e.getDateStart().getValue().getRawComponents().getHour());
                     System.out.println("Date end: " + e.getDateEnd().getValue());
                     System.out.println("-- --- -- ");
-                }
-
+                }*/
             }
             catch (IOException e)
             {
@@ -85,9 +72,7 @@ public class MainActivity extends AppCompatActivity
             finally
             {
                 runOnUiThread(()->
-                {
-                    dialog.dismiss();
-                });
+                        dialog.dismiss());
             }
         }).start();
     }
