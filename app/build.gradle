@@ -17,6 +17,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
 }
 
 dependencies {
@@ -29,4 +33,6 @@ dependencies {
     implementation 'net.sf.biweekly:biweekly:0.6.1'
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.android.volley:volley:1.0.0'
+    implementation 'com.github.perezjquim:uihelper:master-SNAPSHOT'
+    implementation 'org.mnode.ical4j:ical4j:2.2.0'
 }
