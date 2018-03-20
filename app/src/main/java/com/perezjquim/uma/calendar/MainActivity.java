@@ -1,5 +1,6 @@
 package com.perezjquim.uma.calendar;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity
     private RequestQueue queue;
     private ProgressBar progress;
     private LinearLayout list;
+    private Dialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -44,53 +46,29 @@ public class MainActivity extends AppCompatActivity
         queue = Volley.newRequestQueue(this);
         progress = findViewById(R.id.progress);
         list = findViewById(R.id.lay);
+        dialog = new Dialog(this,R.style.TransparentProgressDialog);
+        dialog.setCancelable(false);
+        dialog.addContentView(new ProgressBar(this),new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT));
     }
     public void requestCalendar(View v)
     {
-        toast(this,"aaa");
         new Thread(()->
         {
             runOnUiThread(()->
             {
-                progress.setVisibility(View.VISIBLE);
-                getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+               dialog.show();
             });
-                InputStream is = null;
-            try {
-                is = new URL("http://calendar.uma.pt/"+field.getText()).openStream();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            ICalendar ical = null;
-            try {
-                ical = Biweekly.parse(is).first();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            List<VEvent> events = ical.getEvents();
 
-
-           /* try {
-                JSONArray array = new JSONArray(ical.writeJson());
-                ical.w
-                JSONArray events = (JSONArray) array.get(2);
-                for (int i = 2; i< array.length() ; i++)
-                {
-                        System.out.println(array.get(i));
-
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }*/
-            toast(this,"ola");
-            runOnUiThread(()->
+            try
             {
+                InputStream is = new URL("http://calendar.uma.pt/"+field.getText()).openStream();
+                ICalendar ical = Biweekly.parse(is).first();
+                List<VEvent> events = ical.getEvents();
                 for(VEvent e : events)
                 {
                     TextView t = new TextView(this);
-                    t.setText( e.getSummary().getValue());
-                    list.addView(t);
+                    t.setText(e.getSummary().getValue());
+                    runOnUiThread(()-> list.addView(t));
                     System.out.println("-- EVENTO -- ");
                     System.out.println(e.toString());
                     System.out.println("Aula: " + e.getSummary().getValue());
@@ -98,9 +76,19 @@ public class MainActivity extends AppCompatActivity
                     System.out.println("Date end: " + e.getDateEnd().getValue());
                     System.out.println("-- --- -- ");
                 }
-                progress.setVisibility(View.GONE);
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            });
+
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            finally
+            {
+                runOnUiThread(()->
+                {
+                    dialog.dismiss();
+                });
+            }
         }).start();
     }
 }
