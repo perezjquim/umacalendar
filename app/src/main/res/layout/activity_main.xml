@@ -16,7 +16,13 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="GET CALENDAR"
+            android:text="@string/GET_CALENDAR"
             android:onClick="requestCalendar"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/LOAD_CALENDAR"
+            android:onClick="loadPreviousCalendar"/>
 
 </LinearLayout>

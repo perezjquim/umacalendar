@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">uma-calendar</string>
+    <string name="GET_CALENDAR">Atualizar calendário</string>
+    <string name="LOAD_CALENDAR">Carregar calendário prévio</string>
 </resources>

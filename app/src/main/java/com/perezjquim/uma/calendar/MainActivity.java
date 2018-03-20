@@ -58,4 +58,9 @@ public class MainActivity extends AppCompatActivity
             }
         }).start();
     }
+
+    public void loadPreviousCalendar(View v)
+    {
+        startActivity( new Intent(this,ResultsActivity.class));
+    }
 }
