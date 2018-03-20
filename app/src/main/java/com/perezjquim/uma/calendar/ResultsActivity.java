@@ -39,8 +39,10 @@ public class ResultsActivity extends AppCompatActivity {
                 info = info[1].split("[\\(\\)]");
                 String tipo = info[0];
                 String prof = info[1];
-                String date = e.getDateStart().getValue().getRawComponents().toDate().toString();
-                EventView out = new EventView(this,cadeira,tipo,prof,sala,date);
+                String date = e.getDateStart().getValue().toString().substring(0, 10);
+                String start = e.getDateStart().getValue().toString().substring(11,16);
+                String end = e.getDateEnd().getValue().toString().substring(11,16);
+                EventView out = new EventView(this,cadeira,tipo,prof,sala,date,start,end);
                 out.setPadding(10,10,10,10);
                 runOnUiThread(()->
                         lay.addView(out));

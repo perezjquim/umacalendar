@@ -11,26 +11,30 @@ public class EventView extends LinearLayout
     private TextView txtLabel;
     private TextView txtInfo;
 
-    public EventView(Context context, AttributeSet attrs, String label, String tipo, String prof, String sala, String date)
+    public EventView(Context context, AttributeSet attrs, String label, String tipo, String prof, String sala, String date, String start, String end)
     {
         super(context, attrs);
         init(context);
         setLabel(label + " - " + tipo);
         setInfo(
-                prof+"\n"+
-                sala+"\n"+
-                date);
+                        prof+"\n"+
+                        sala+"\n"+
+                        date+"\n"+
+                        start+" - "+end
+        );
     }
 
-    public EventView(Context context, String label, String tipo, String prof, String sala, String date)
+    public EventView(Context context, String label, String tipo, String prof, String sala, String date, String start, String end)
     {
         super(context);
         init(context);
         setLabel(label + " - " + tipo);
         setInfo(
-                prof+"\n"+
+                        prof+"\n"+
                         sala+"\n"+
-                        date);
+                        date+"\n"+
+                        start+" - "+end
+        );
     }
 
     public EventView(Context context, AttributeSet attrs)
