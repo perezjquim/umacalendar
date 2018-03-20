@@ -2,6 +2,7 @@ package com.perezjquim.uma.calendar;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -56,11 +57,14 @@ public class EventView extends LinearLayout
     private void init(Context c)
     {
         this.setOrientation(LinearLayout.VERTICAL);
+        this.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         txtLabel = new TextView(c);
         txtLabel.setAllCaps(true);
         txtLabel.setTextSize(30);
         txtInfo = new TextView(c);
+        txtInfo.setTextSize(20);
         txtDate = new TextView(c);
+        txtDate.setTextSize(20);
         addView(txtLabel);
         addView(txtInfo);
         addView(txtDate);
