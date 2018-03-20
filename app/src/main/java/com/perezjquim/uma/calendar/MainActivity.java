@@ -30,9 +30,11 @@ public class MainActivity extends AppCompatActivity
         field = findViewById(R.id.field);
         prefs = new SharedPreferencesHelper(this);
         dialog = new Dialog(this,R.style.TransparentProgressDialog);
+        dialog.setTitle("Obtendo calendário..");
         dialog.setCancelable(false);
         dialog.addContentView(new ProgressBar(this),new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT));
     }
+
     public void requestCalendar(View v)
     {
         new Thread(()->
@@ -61,6 +63,11 @@ public class MainActivity extends AppCompatActivity
 
     public void loadPreviousCalendar(View v)
     {
-        startActivity( new Intent(this,ResultsActivity.class));
+        new Thread(()->
+        {
+            startActivity(new Intent(this,ResultsActivity.class));
+        }).start();
     }
+
+
 }

@@ -8,6 +8,12 @@
     android:padding="10dp"
     tools:context="com.perezjquim.uma.calendar.MainActivity">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:text="@string/TEXT_NMEC"/>
+
         <AutoCompleteTextView
             android:id="@+id/field"
             android:layout_width="match_parent"
