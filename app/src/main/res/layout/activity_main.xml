@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:orientation="vertical"
-    android:padding="10dp"
+    android:padding="20dp"
     tools:context="com.perezjquim.uma.calendar.MainActivity">
 
         <TextView
@@ -17,17 +17,20 @@
         <AutoCompleteTextView
             android:id="@+id/field"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:inputType="number"/>
 
         <Button
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="0.2"
             android:text="@string/GET_CALENDAR"
             android:onClick="requestCalendar"/>
 
         <Button
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="0.2"
             android:text="@string/LOAD_CALENDAR"
             android:onClick="loadPreviousCalendar"/>
 
