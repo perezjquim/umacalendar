@@ -1,12 +1,9 @@
 package com.perezjquim.uma.calendar;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.perezjquim.SharedPreferencesHelper;
@@ -16,12 +13,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
 
+import static com.perezjquim.UIHelper.hideProgressDialog;
+import static com.perezjquim.UIHelper.showProgressDialog;
 import static com.perezjquim.UIHelper.toast;
 
 public class MainActivity extends AppCompatActivity
 {
     private TextView field;
-    private Dialog dialog;
     private SharedPreferencesHelper prefs;
 
     @Override
@@ -31,10 +29,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         field = findViewById(R.id.field);
         prefs = new SharedPreferencesHelper(this);
-        dialog = new Dialog(this,R.style.TransparentProgressDialog);
-        dialog.setTitle("Obtendo calendário..");
-        dialog.setCancelable(false);
-        dialog.addContentView(new ProgressBar(this),new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT));
     }
 
     public void requestCalendar(View v)
@@ -42,9 +36,10 @@ public class MainActivity extends AppCompatActivity
         new Thread(()->
         {
             runOnUiThread(()->
-                    dialog.show());
+                    showProgressDialog(this,"Obtendo calendário.."));
             try
             {
+                if(field.getText().equals("")) throw new IOException();
                 InputStream is = new URL("http://calendar.uma.pt/"+field.getText()).openStream();
                 Scanner s = new Scanner(is).useDelimiter("\\A");
                 String events = s.hasNext() ? s.next() : "";
@@ -59,7 +54,7 @@ public class MainActivity extends AppCompatActivity
             finally
             {
                 runOnUiThread(()->
-                        dialog.dismiss());
+                        hideProgressDialog());
             }
         }).start();
     }

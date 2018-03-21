@@ -16,24 +16,22 @@ import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
 
+import static com.perezjquim.UIHelper.hideProgressDialog;
+import static com.perezjquim.UIHelper.showProgressDialog;
+
 public class ResultsActivity extends AppCompatActivity {
 
     private LinearLayout lay;
     private SharedPreferencesHelper prefs;
-    private Dialog dialog;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_results);
-        dialog = new Dialog(this,R.style.TransparentProgressDialog);
-        dialog.setTitle("Preparando..");
-        dialog.setCancelable(false);
-        dialog.addContentView(new ProgressBar(this),new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT));
         new Thread(()->
         {
             runOnUiThread(()->
-                    dialog.show());
+                    showProgressDialog(this,"Preparando.."));
 
             prefs = new SharedPreferencesHelper(this);
             lay = findViewById(R.id.lay);
@@ -41,8 +39,10 @@ public class ResultsActivity extends AppCompatActivity {
             ICalendar ical = Biweekly.parse(s).first();
             List<VEvent> events = ical.getEvents();
             long today = Calendar.getInstance().getTimeInMillis();
+
             runOnUiThread(()->
-                    dialog.dismiss());
+                   hideProgressDialog());
+
             for (VEvent e : events)
             {
                 long eventDate = e.getDateStart().getValue().getTime();
