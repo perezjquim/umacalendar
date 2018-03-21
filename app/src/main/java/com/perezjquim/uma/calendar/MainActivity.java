@@ -21,6 +21,9 @@ public class MainActivity extends AppCompatActivity
 {
     private TextView field;
     private SharedPreferencesHelper prefs;
+    private static final String PROGRESS_MESSAGE = "Obtendo calendário..";
+    private static final String ERROR_MESSAGE = "Número mecanográfico inválido ou falta de conectividade!";
+    private static final String CALENDAR_URL = "http://calendar.uma.pt/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -36,11 +39,12 @@ public class MainActivity extends AppCompatActivity
         new Thread(()->
         {
             runOnUiThread(()->
-                    showProgressDialog(this,"Obtendo calendário.."));
+                    showProgressDialog(this,PROGRESS_MESSAGE));
             try
             {
-                if(field.getText().equals("")) throw new IOException();
-                InputStream is = new URL("http://calendar.uma.pt/"+field.getText()).openStream();
+                if(field.getText().length() == 0) throw new IOException();
+
+                InputStream is = new URL(CALENDAR_URL+field.getText()).openStream();
                 Scanner s = new Scanner(is).useDelimiter("\\A");
                 String events = s.hasNext() ? s.next() : "";
                 prefs.setString("misc","events",events);
@@ -48,7 +52,7 @@ public class MainActivity extends AppCompatActivity
             }
             catch (IOException e)
             {
-                toast(this,"Número mecanográfico inválido ou falta de conectividade!");
+                toast(this,ERROR_MESSAGE);
                 e.printStackTrace();
             }
             finally
@@ -62,10 +66,6 @@ public class MainActivity extends AppCompatActivity
     public void loadPreviousCalendar(View v)
     {
         new Thread(()->
-        {
-            startActivity(new Intent(this,ResultsActivity.class));
-        }).start();
+                startActivity(new Intent(this,ResultsActivity.class))).start();
     }
-
-
 }
