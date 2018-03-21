@@ -7,6 +7,8 @@ import android.widget.LinearLayout;
 import com.perezjquim.SharedPreferencesHelper;
 
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import biweekly.Biweekly;
@@ -39,15 +41,16 @@ public class ResultsActivity extends AppCompatActivity
             String s = prefs.getString("misc", "events");
             ICalendar ical = Biweekly.parse(s).first();
             List<VEvent> events = ical.getEvents();
-            long today = Calendar.getInstance().getTimeInMillis();
+            Collections.sort(events,(a,b) ->a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
+            Date today = Calendar.getInstance().getTime();
 
             runOnUiThread(()->
                    hideProgressDialog());
 
             for (VEvent e : events)
             {
-                long eventDate = e.getDateStart().getValue().getTime();
-                if (today <= eventDate)
+                Date eventDate = e.getDateStart().getValue();
+                if (today.before(eventDate))
                 {
                     // "Engenharia de Requisitos"
                     String cadeira = e.getSummary().getValue();
