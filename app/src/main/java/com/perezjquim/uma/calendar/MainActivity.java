@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferencesHelper prefs;
     private static final String PROGRESS_MESSAGE = "Obtendo calendário..";
     private static final String ERROR_MESSAGE = "Número mecanográfico inválido ou falta de conectividade!";
+    private static final String ERROR_MESSAGE_CALENDAR_NOT_FOUND = "Calendário inexistente!";
     private static final String CALENDAR_URL = "http://calendar.uma.pt/";
     private static final String PREFS_FILE = "misc";
     private static final String PREFS_LAST_NUMBER = "lastnr";
@@ -73,6 +74,16 @@ public class MainActivity extends AppCompatActivity
     public void loadPreviousCalendar(View v)
     {
         new Thread(()->
-                startActivity(new Intent(this,ResultsActivity.class))).start();
+        {
+            boolean hasPreviousData = prefs.getString(PREFS_FILE,PREFS_EVENTS_STRING) != null;
+            if(hasPreviousData)
+            {
+                startActivity(new Intent(this,ResultsActivity.class));
+            }
+            else
+            {
+                toast(this,ERROR_MESSAGE_CALENDAR_NOT_FOUND);
+            }
+        }).start();
     }
 }

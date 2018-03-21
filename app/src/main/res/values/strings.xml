@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">UMa - Calendário</string>
     <string name="GET_CALENDAR">Obter calendário</string>
-    <string name="LOAD_CALENDAR">Carregar calendário prévio</string>
+    <string name="LOAD_CALENDAR">Ver último calendário</string>
     <string name="TEXT_NMEC">Número mecanográfico:   (ex.: 20XXX18)</string>
 </resources>
