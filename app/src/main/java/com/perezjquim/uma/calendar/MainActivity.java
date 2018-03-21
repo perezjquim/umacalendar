@@ -24,6 +24,9 @@ public class MainActivity extends AppCompatActivity
     private static final String PROGRESS_MESSAGE = "Obtendo calendário..";
     private static final String ERROR_MESSAGE = "Número mecanográfico inválido ou falta de conectividade!";
     private static final String CALENDAR_URL = "http://calendar.uma.pt/";
+    private static final String PREFS_FILE = "misc";
+    private static final String PREFS_LAST_NUMBER = "lastnr";
+    private static final String PREFS_EVENTS_STRING = "events";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -32,6 +35,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         field = findViewById(R.id.field);
         prefs = new SharedPreferencesHelper(this);
+        String lastNr = prefs.getString(PREFS_FILE,PREFS_LAST_NUMBER);
+        if(lastNr != null)
+            field.setText(lastNr);
     }
 
     public void requestCalendar(View v)
@@ -44,10 +50,11 @@ public class MainActivity extends AppCompatActivity
             {
                 if(field.getText().length() == 0) throw new IOException();
 
+                prefs.setString(PREFS_FILE,PREFS_LAST_NUMBER,field.getText()+"");
                 InputStream is = new URL(CALENDAR_URL+field.getText()).openStream();
                 Scanner s = new Scanner(is).useDelimiter("\\A");
                 String events = s.hasNext() ? s.next() : "";
-                prefs.setString("misc","events",events);
+                prefs.setString(PREFS_FILE,PREFS_EVENTS_STRING,events);
                 startActivity( new Intent(this,ResultsActivity.class));
             }
             catch (IOException e)
