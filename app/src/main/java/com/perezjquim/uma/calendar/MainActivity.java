@@ -65,8 +65,8 @@ public class MainActivity extends AppCompatActivity
             }
             finally
             {
-                runOnUiThread(()->
-                        hideProgressDialog());
+                /*runOnUiThread(()->
+                        hideProgressDialog());*/
             }
         }).start();
     }

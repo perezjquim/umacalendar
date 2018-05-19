@@ -10,27 +10,33 @@
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="0.35"
             android:textAlignment="center"
             android:text="@string/TEXT_NMEC"/>
 
         <AutoCompleteTextView
             android:id="@+id/field"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="0.15"
             android:inputType="number"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.2"
+            android:layout_weight="0.3"
             android:text="@string/GET_CALENDAR"
+            android:drawableLeft="@android:drawable/ic_menu_rotate"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/white"
             android:onClick="requestCalendar"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="0.2"
+            android:drawableLeft="@android:drawable/ic_menu_view"
             android:text="@string/LOAD_CALENDAR"
             android:onClick="loadPreviousCalendar"/>
 

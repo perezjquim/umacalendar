@@ -44,9 +44,6 @@ public class ResultsActivity extends AppCompatActivity
             Collections.sort(events,(a,b) ->a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
             Date today = Calendar.getInstance().getTime();
 
-            runOnUiThread(()->
-                   hideProgressDialog());
-
             for (VEvent e : events)
             {
                 Date eventDate = e.getDateStart().getValue();
@@ -82,6 +79,10 @@ public class ResultsActivity extends AppCompatActivity
                             lay.addView(out));
                 }
             }
+
+            runOnUiThread(()->
+                    hideProgressDialog());
+
         }).start();
     }
 }
