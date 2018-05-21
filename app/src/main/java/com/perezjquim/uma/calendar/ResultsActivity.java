@@ -1,5 +1,6 @@
 package com.perezjquim.uma.calendar;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.LinearLayout;
@@ -30,6 +31,9 @@ public class ResultsActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_results);
+        Intent i = getIntent();
+        boolean isAulas = i.getBooleanExtra("isAulas",false);
+
         new Thread(()->
         {
             runOnUiThread(()->
@@ -47,7 +51,7 @@ public class ResultsActivity extends AppCompatActivity
             for (VEvent e : events)
             {
                 Date eventDate = e.getDateStart().getValue();
-                if (today.before(eventDate))
+                if (today.before(eventDate) && (isAulas ^ e.getSummary().getValue().contains("Avaliação")))
                 {
                     // "Engenharia de Requisitos"
                     String cadeira = e.getSummary().getValue();

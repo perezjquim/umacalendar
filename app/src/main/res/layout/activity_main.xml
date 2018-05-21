@@ -4,40 +4,51 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
+    android:gravity="center"
     android:orientation="vertical"
     android:padding="20dp"
+    android:dividerPadding="20dp"
     tools:context="com.perezjquim.uma.calendar.MainActivity">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.35"
-            android:textAlignment="center"
-            android:text="@string/TEXT_NMEC"/>
+                   android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                   android:layout_weight="0.2"
+                    android:gravity="center"
+                    android:text="@string/TEXT_NMEC"/>
+
 
         <AutoCompleteTextView
-            android:id="@+id/field"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.15"
-            android:inputType="number"/>
+                   android:id="@+id/field"
+                  android:layout_width="match_parent"
+                  android:layout_height="0dp"
+                  android:layout_weight="0.15"
+            android:gravity="center"
+                android:inputType="number"/>
+
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.3"
-            android:text="@string/GET_CALENDAR"
-            android:drawableLeft="@android:drawable/ic_menu_rotate"
+            android:layout_weight="0.325"
+            android:text="@string/LBL_AULAS"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:layout_margin="10dp"
             android:background="@color/colorPrimary"
             android:textColor="@color/white"
-            android:onClick="requestCalendar"/>
+            android:onClick="listAulas"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.2"
-            android:drawableLeft="@android:drawable/ic_menu_view"
-            android:text="@string/LOAD_CALENDAR"
-            android:onClick="loadPreviousCalendar"/>
+            android:layout_weight="0.325"
+            android:gravity="center"
+            android:layout_margin="10dp"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/white"
+            android:text="@string/LBL_AVALIACOES"
+            android:textSize="20sp"
+            android:onClick="listAvaliacoes"/>
 
 </LinearLayout>

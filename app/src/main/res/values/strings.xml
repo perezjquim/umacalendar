@@ -3,4 +3,6 @@
     <string name="GET_CALENDAR">Atualizar calendário</string>
     <string name="LOAD_CALENDAR">Consultar calendário</string>
     <string name="TEXT_NMEC">Número mecanográfico:</string>
+    <string name="LBL_AULAS">Aulas</string>
+    <string name="LBL_AVALIACOES">Avaliações</string>
 </resources>

@@ -3,6 +3,8 @@ package com.perezjquim.uma.calendar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -21,6 +23,7 @@ public class MainActivity extends AppCompatActivity
 {
     private TextView field;
     private SharedPreferencesHelper prefs;
+    private String lastNr;
     private static final String PROGRESS_MESSAGE = "Obtendo calendário..";
     private static final String ERROR_MESSAGE = "Número mecanográfico inválido ou falta de conectividade!";
     private static final String ERROR_MESSAGE_CALENDAR_NOT_FOUND = "Calendário inexistente!";
@@ -28,6 +31,7 @@ public class MainActivity extends AppCompatActivity
     private static final String PREFS_FILE = "misc";
     private static final String PREFS_LAST_NUMBER = "lastnr";
     private static final String PREFS_EVENTS_STRING = "events";
+    private Thread tRequestCalendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -36,53 +40,98 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         field = findViewById(R.id.field);
         prefs = new SharedPreferencesHelper(this);
-        String lastNr = prefs.getString(PREFS_FILE,PREFS_LAST_NUMBER);
+        lastNr = prefs.getString(PREFS_FILE,PREFS_LAST_NUMBER);
         if(lastNr != null)
             field.setText(lastNr);
     }
 
-    public void requestCalendar(View v)
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
     {
-        new Thread(()->
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        try
         {
-            runOnUiThread(()->
-                    showProgressDialog(this,PROGRESS_MESSAGE));
+            requestCalendar();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void requestCalendar() throws IOException
+    {
+        tRequestCalendar = new Thread(()->
+        {
             try
             {
-                if(field.getText().length() == 0) throw new IOException();
+                runOnUiThread(() ->
+                        showProgressDialog(this, PROGRESS_MESSAGE));
 
-                prefs.setString(PREFS_FILE,PREFS_LAST_NUMBER,field.getText()+"");
-                InputStream is = new URL(CALENDAR_URL+field.getText()).openStream();
+                if (field.getText().length() == 0) throw new IOException();
+
+                lastNr = field.getText() + "";
+                prefs.setString(PREFS_FILE, PREFS_LAST_NUMBER, lastNr);
+                InputStream is = new URL(CALENDAR_URL + field.getText()).openStream();
                 Scanner s = new Scanner(is).useDelimiter("\\A");
                 String events = s.hasNext() ? s.next() : "";
-                prefs.setString(PREFS_FILE,PREFS_EVENTS_STRING,events);
-                startActivity( new Intent(this,ResultsActivity.class));
+                prefs.setString(PREFS_FILE, PREFS_EVENTS_STRING, events);
             }
             catch (IOException e)
             {
-                toast(this,ERROR_MESSAGE);
                 e.printStackTrace();
             }
             finally
             {
-                /*runOnUiThread(()->
-                        hideProgressDialog());*/
+                runOnUiThread(()->
+                        hideProgressDialog());
             }
-        }).start();
+
+        });
+        tRequestCalendar.start();
     }
 
-    public void loadPreviousCalendar(View v)
+    public void listAulas(View v)
+    { loadPreviousCalendar(true);}
+
+    public void listAvaliacoes(View v)
+    { loadPreviousCalendar(false);}
+
+    private void loadPreviousCalendar(boolean isAulas)
     {
         new Thread(()->
         {
-            boolean hasPreviousData = prefs.getString(PREFS_FILE,PREFS_EVENTS_STRING) != null;
-            if(hasPreviousData)
+            try
             {
-                startActivity(new Intent(this,ResultsActivity.class));
+                if (!lastNr.equals(field.getText()+""))
+                {
+                    requestCalendar();
+                    tRequestCalendar.join();
+                }
+
+                boolean hasPreviousData = prefs.getString(PREFS_FILE, PREFS_EVENTS_STRING) != null;
+                if (hasPreviousData)
+                {
+                    Intent i = new Intent(this, ResultsActivity.class);
+                    i.putExtra("isAulas", isAulas);
+                    startActivity(i);
+                }
+                else
+                {
+                    toast(this, ERROR_MESSAGE_CALENDAR_NOT_FOUND);
+                }
             }
-            else
+            catch(IOException | InterruptedException e)
             {
-                toast(this,ERROR_MESSAGE_CALENDAR_NOT_FOUND);
+                toast(this,ERROR_MESSAGE);
+                e.printStackTrace();
             }
         }).start();
     }
