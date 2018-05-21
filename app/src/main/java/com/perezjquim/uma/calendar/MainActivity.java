@@ -24,14 +24,13 @@ public class MainActivity extends AppCompatActivity
     private TextView field;
     private SharedPreferencesHelper prefs;
     private String lastNr;
+    private Thread tRequestCalendar;
     private static final String PROGRESS_MESSAGE = "Obtendo calendário..";
     private static final String ERROR_MESSAGE = "Número mecanográfico inválido ou falta de conectividade!";
-    private static final String ERROR_MESSAGE_CALENDAR_NOT_FOUND = "Calendário inexistente!";
     private static final String CALENDAR_URL = "http://calendar.uma.pt/";
     private static final String PREFS_FILE = "misc";
     private static final String PREFS_LAST_NUMBER = "lastnr";
     private static final String PREFS_EVENTS_STRING = "events";
-    private Thread tRequestCalendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -41,8 +40,7 @@ public class MainActivity extends AppCompatActivity
         field = findViewById(R.id.field);
         prefs = new SharedPreferencesHelper(this);
         lastNr = prefs.getString(PREFS_FILE,PREFS_LAST_NUMBER);
-        if(lastNr != null)
-            field.setText(lastNr);
+        if(lastNr != null) field.setText(lastNr);
     }
 
     @Override
@@ -86,6 +84,7 @@ public class MainActivity extends AppCompatActivity
             }
             catch (IOException e)
             {
+                toast(this,ERROR_MESSAGE);
                 e.printStackTrace();
             }
             finally
@@ -110,23 +109,15 @@ public class MainActivity extends AppCompatActivity
         {
             try
             {
-                if (!lastNr.equals(field.getText()+""))
+                if (lastNr == null || !lastNr.equals(field.getText()+""))
                 {
                     requestCalendar();
                     tRequestCalendar.join();
                 }
 
-                boolean hasPreviousData = prefs.getString(PREFS_FILE, PREFS_EVENTS_STRING) != null;
-                if (hasPreviousData)
-                {
-                    Intent i = new Intent(this, ResultsActivity.class);
-                    i.putExtra("isAulas", isAulas);
-                    startActivity(i);
-                }
-                else
-                {
-                    toast(this, ERROR_MESSAGE_CALENDAR_NOT_FOUND);
-                }
+                Intent i = new Intent(this, ResultsActivity.class);
+                i.putExtra("isAulas", isAulas);
+                startActivity(i);
             }
             catch(IOException | InterruptedException e)
             {
