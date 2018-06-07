@@ -20,6 +20,7 @@ public class EventView extends CardView
     private TextView txtTime;
 
     private static final int FONT_SIZE = 20;
+    private static final int PADDING = 10;
 
     public EventView(Context context, AttributeSet attrs, String label, String tipo, String prof, String sala, String date, String start, String end)
     {
@@ -68,20 +69,29 @@ public class EventView extends CardView
 
     private void init(Context c)
     {
+        this.setLayoutParams(new LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+
         content = new LinearLayout(c);
         content.setOrientation(LinearLayout.VERTICAL);
-        content.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        this.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        content.setLayoutParams(new LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        content.setPadding(PADDING,PADDING,PADDING,PADDING);
+
         txtLabel = new TextView(c);
         txtProf = new TextView(c);
         txtLocation = new TextView(c);
         txtDate = new TextView(c);
         txtTime = new TextView(c);
+
         initLabel(c,txtLabel);
         initInfo(c,txtProf,android.R.drawable.ic_menu_info_details);
         initInfo(c,txtLocation,android.R.drawable.ic_dialog_map);
         initInfo(c,txtDate,android.R.drawable.ic_menu_my_calendar);
         initInfo(c,txtTime,android.R.drawable.ic_menu_recent_history);
+
         addView(content);
     }
 

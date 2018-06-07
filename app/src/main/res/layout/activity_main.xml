@@ -10,20 +10,13 @@
     android:dividerPadding="20dp"
     tools:context="com.perezjquim.uma.calendar.MainActivity">
 
-        <TextView
-                   android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                   android:layout_weight="0.2"
-                    android:gravity="center"
-                    android:text="@string/TEXT_NMEC"/>
-
-
-        <AutoCompleteTextView
-                   android:id="@+id/field"
-                  android:layout_width="match_parent"
-                  android:layout_height="0dp"
-                  android:layout_weight="0.15"
-            android:gravity="center"
+        <EditText
+                android:id="@+id/field"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.35"
+                android:gravity="center"
+                android:hint="@string/HINT_NMEC"
                 android:inputType="number"/>
 
 

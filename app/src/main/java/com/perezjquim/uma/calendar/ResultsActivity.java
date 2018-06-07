@@ -7,6 +7,7 @@ import android.widget.LinearLayout;
 
 import com.perezjquim.SharedPreferencesHelper;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -16,15 +17,15 @@ import biweekly.Biweekly;
 import biweekly.ICalendar;
 import biweekly.component.VEvent;
 
-import static com.perezjquim.UIHelper.hideProgressDialog;
-import static com.perezjquim.UIHelper.showProgressDialog;
+import static com.perezjquim.UIHelper.closeProgressDialog;
+import static com.perezjquim.UIHelper.openProgressDialog;
+import static com.perezjquim.UIHelper.toast;
 
 public class ResultsActivity extends AppCompatActivity
 {
     private LinearLayout lay;
     private SharedPreferencesHelper prefs;
     private static final String PROGRESS_MESSAGE = "Preparando..";
-    private static final int PADDING = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -37,21 +38,27 @@ public class ResultsActivity extends AppCompatActivity
         new Thread(()->
         {
             runOnUiThread(()->
-                    showProgressDialog(this,PROGRESS_MESSAGE));
+                    openProgressDialog(this,PROGRESS_MESSAGE));
 
             prefs = new SharedPreferencesHelper(this);
             lay = findViewById(R.id.lay);
 
-            String s = prefs.getString("misc", "events");
+            String s;
+            if(isAulas) s = prefs.getString(
+                    Prefs.FILE_MISC+"",
+                    Prefs.KEY_AULAS+"");
+            else s = prefs.getString(
+                    Prefs.FILE_MISC+"",
+                    Prefs.KEY_AVALIACOES+"");
+
             ICalendar ical = Biweekly.parse(s).first();
-            List<VEvent> events = ical.getEvents();
-            Collections.sort(events,(a,b) ->a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
+            ArrayList<VEvent> events = new ArrayList<>(ical.getEvents());
             Date today = Calendar.getInstance().getTime();
 
             for (VEvent e : events)
             {
                 Date eventDate = e.getDateStart().getValue();
-                if (today.before(eventDate) && (isAulas ^ e.getSummary().getValue().contains("Avaliação")))
+                if (today.before(eventDate))
                 {
                     // "Engenharia de Requisitos"
                     String cadeira = e.getSummary().getValue();
@@ -77,7 +84,6 @@ public class ResultsActivity extends AppCompatActivity
                     String end = e.getDateEnd().getValue().toString().substring(11, 16);
 
                     EventView out = new EventView(this, cadeira, tipo, prof, sala, date, start, end);
-                    out.setPadding(PADDING, PADDING, PADDING, PADDING);
 
                     runOnUiThread(() ->
                             lay.addView(out));
@@ -85,7 +91,7 @@ public class ResultsActivity extends AppCompatActivity
             }
 
             runOnUiThread(()->
-                    hideProgressDialog());
+                closeProgressDialog());
 
         }).start();
     }

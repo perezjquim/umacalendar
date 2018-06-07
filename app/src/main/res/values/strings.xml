@@ -5,4 +5,5 @@
     <string name="TEXT_NMEC">Número mecanográfico:</string>
     <string name="LBL_AULAS">Aulas</string>
     <string name="LBL_AVALIACOES">Avaliações</string>
+    <string name="HINT_NMEC">Número mecanográfico</string>
 </resources>
