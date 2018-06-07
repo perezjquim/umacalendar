@@ -9,9 +9,7 @@ import com.perezjquim.SharedPreferencesHelper;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
@@ -19,7 +17,6 @@ import biweekly.component.VEvent;
 
 import static com.perezjquim.UIHelper.closeProgressDialog;
 import static com.perezjquim.UIHelper.openProgressDialog;
-import static com.perezjquim.UIHelper.toast;
 
 public class ResultsActivity extends AppCompatActivity
 {
@@ -37,8 +34,7 @@ public class ResultsActivity extends AppCompatActivity
 
         new Thread(()->
         {
-            runOnUiThread(()->
-                    openProgressDialog(this,PROGRESS_MESSAGE));
+            openProgressDialog(this,PROGRESS_MESSAGE);
 
             prefs = new SharedPreferencesHelper(this);
             lay = findViewById(R.id.lay);
@@ -90,8 +86,7 @@ public class ResultsActivity extends AppCompatActivity
                 }
             }
 
-            runOnUiThread(()->
-                closeProgressDialog());
+            closeProgressDialog();
 
         }).start();
     }

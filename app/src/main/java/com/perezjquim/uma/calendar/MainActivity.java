@@ -1,20 +1,14 @@
 package com.perezjquim.uma.calendar;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.perezjquim.SharedPreferencesHelper;
 
 import java.io.IOException;
@@ -22,12 +16,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Scanner;
 
 import biweekly.Biweekly;
@@ -43,8 +33,9 @@ public class MainActivity extends AppCompatActivity
     private TextView field;
     private SharedPreferencesHelper prefs;
     private int lastNr;
-    private Thread tRequestCalendar;
+    private RequestThread tRequestCalendar;
     private static final String PROGRESS_MESSAGE = "Obtendo calendário..";
+    private static final String LOADING_MESSAGE = "Carregando calendário..";
     private static final String ERROR_MESSAGE = "Número mecanográfico inválido ou falta de conectividade!";
     private static final String CALENDAR_URL = "http://calendar.uma.pt/";
 
@@ -71,26 +62,76 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        try
-        {
-            requestCalendar();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    public void requestCalendar() throws IOException
-    {
-        tRequestCalendar = new Thread(()->
+        new Thread(()->
         {
             try
             {
-                runOnUiThread(()->
-                        openProgressDialog(this, PROGRESS_MESSAGE));
+                openProgressDialog(this,PROGRESS_MESSAGE);
+                tRequestCalendar = new RequestThread();
+                tRequestCalendar.start();
+                tRequestCalendar.join();
+                tRequestCalendar.checkForException();
+            }
+            catch (Exception e)
+            {
+                toast(this,ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+            finally
+            {
+                closeProgressDialog();
+            }
+        }).start();
+        return super.onOptionsItemSelected(item);
+    }
 
+    public void listAulas(View v)
+    { loadPreviousCalendar(true);}
+
+    public void listAvaliacoes(View v)
+    { loadPreviousCalendar(false);}
+
+    private void loadPreviousCalendar(boolean isAulas)
+    {
+        new Thread(()->
+        {
+            try
+            {
+                openProgressDialog(this, LOADING_MESSAGE);
+
+                if (lastNr == -1 || lastNr != Integer.parseInt(field.getText()+""))
+                {
+                    tRequestCalendar = new RequestThread();
+                    tRequestCalendar.start();
+                    tRequestCalendar.join();
+                    tRequestCalendar.checkForException();
+                }
+
+                Intent i = new Intent(this, ResultsActivity.class);
+                i.putExtra("isAulas", isAulas);
+                startActivity(i);
+            }
+            catch(IOException | InterruptedException e)
+            {
+                toast(this,ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+            finally
+            {
+               closeProgressDialog();
+            }
+        }).start();
+    }
+
+    private class RequestThread extends Thread
+    {
+        private IOException exception;
+
+        @Override
+        public void run()
+        {
+            try
+            {
                 if (field.getText().length() == 0) throw new IOException();
 
                 InputStream is = new URL(CALENDAR_URL + field.getText()).openStream();
@@ -134,45 +175,14 @@ public class MainActivity extends AppCompatActivity
             }
             catch (IOException e)
             {
-                toast(this,ERROR_MESSAGE);
+                exception = e;
                 e.printStackTrace();
             }
-            finally
-            {
-                runOnUiThread(()->
-                        closeProgressDialog());
-            }
-        });
-        tRequestCalendar.start();
-    }
+        }
 
-    public void listAulas(View v)
-    { loadPreviousCalendar(true);}
-
-    public void listAvaliacoes(View v)
-    { loadPreviousCalendar(false);}
-
-    private void loadPreviousCalendar(boolean isAulas)
-    {
-        new Thread(()->
+        private void checkForException() throws IOException
         {
-            try
-            {
-                if (lastNr == -1 || lastNr != Integer.parseInt(field.getText()+""))
-                {
-                    requestCalendar();
-                    tRequestCalendar.join();
-                }
-
-                Intent i = new Intent(this, ResultsActivity.class);
-                i.putExtra("isAulas", isAulas);
-                startActivity(i);
-            }
-            catch(IOException | InterruptedException e)
-            {
-                toast(this,ERROR_MESSAGE);
-                e.printStackTrace();
-            }
-        }).start();
+            if(exception != null) throw exception;
+        }
     }
 }
