@@ -1,6 +1,5 @@
 package com.perezjquim.uma.calendar;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +42,8 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        super.setTheme(R.style.AppTheme);
+
         setContentView(R.layout.activity_main);
         field = findViewById(R.id.field);
         prefs = new SharedPreferencesHelper(this);
