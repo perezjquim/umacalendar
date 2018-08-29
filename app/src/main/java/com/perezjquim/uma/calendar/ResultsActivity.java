@@ -87,7 +87,7 @@ public class ResultsActivity extends AppCompatActivity
                 runOnUiThread(() -> lay.addView(out));
             }
 
-            closeProgressDialog();
+            closeProgressDialog(this);
 
         }).start();
     }

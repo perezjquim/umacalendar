@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity
             }
             finally
             {
-                closeProgressDialog();
+                closeProgressDialog(this);
             }
         }).start();
         return super.onOptionsItemSelected(item);
@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity
             }
             finally
             {
-               closeProgressDialog();
+               closeProgressDialog(this);
             }
         }).start();
     }
