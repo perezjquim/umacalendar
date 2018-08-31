@@ -54,6 +54,27 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onPause()
+    {
+        super.onPause();
+        closeProgressDialog(this);
+    }
+
+    @Override
+    protected void onStop()
+    {
+        super.onStop();
+        closeProgressDialog(this);
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        closeProgressDialog(this);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -63,26 +84,34 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        new Thread(()->
+        switch(item.getItemId())
         {
-            try
-            {
-                openProgressDialog(this,PROGRESS_MESSAGE);
-                tRequestCalendar = new RequestThread();
-                tRequestCalendar.start();
-                tRequestCalendar.join();
-                tRequestCalendar.checkForException();
-            }
-            catch (Exception e)
-            {
-                toast(this,ERROR_MESSAGE);
-                e.printStackTrace();
-            }
-            finally
-            {
-                closeProgressDialog(this);
-            }
-        }).start();
+            case R.id.refresh:
+                new Thread(()->
+                {
+                    try
+                    {
+                        openProgressDialog(this,PROGRESS_MESSAGE);
+                        tRequestCalendar = new RequestThread();
+                        tRequestCalendar.start();
+                        tRequestCalendar.join();
+                        tRequestCalendar.checkForException();
+                    }
+                    catch (Exception e)
+                    {
+                        toast(this,ERROR_MESSAGE);
+                        e.printStackTrace();
+                    }
+                    finally
+                    {
+                        closeProgressDialog(this);
+                    }
+                }).start();
+                break;
+
+            default:
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -114,12 +143,9 @@ public class MainActivity extends AppCompatActivity
             }
             catch(IOException | InterruptedException e)
             {
+                closeProgressDialog(this);
                 toast(this,ERROR_MESSAGE);
                 e.printStackTrace();
-            }
-            finally
-            {
-               closeProgressDialog(this);
             }
         }).start();
     }
