@@ -8,16 +8,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.StringRequestListener;
 import com.perezjquim.SharedPreferencesHelper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Scanner;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity
     private TextView field;
     private SharedPreferencesHelper prefs;
     private int lastNr;
-    private RequestThread tRequestCalendar;
     private static final String PROGRESS_MESSAGE = "Obtendo calendário..";
     private static final String LOADING_MESSAGE = "Carregando calendário..";
     private static final String ERROR_MESSAGE = "Número mecanográfico inválido ou falta de conectividade!";
@@ -51,6 +50,8 @@ public class MainActivity extends AppCompatActivity
                 Prefs.FILE_MISC+"",
                 Prefs.KEY_LASTNR + "");
         if(lastNr != -1) field.setText(lastNr+"");
+
+        AndroidNetworking.initialize(getApplicationContext());
     }
 
     @Override
@@ -87,26 +88,7 @@ public class MainActivity extends AppCompatActivity
         switch(item.getItemId())
         {
             case R.id.refresh:
-                new Thread(()->
-                {
-                    try
-                    {
-                        openProgressDialog(this,PROGRESS_MESSAGE);
-                        tRequestCalendar = new RequestThread();
-                        tRequestCalendar.start();
-                        tRequestCalendar.join();
-                        tRequestCalendar.checkForException();
-                    }
-                    catch (Exception e)
-                    {
-                        toast(this,ERROR_MESSAGE);
-                        e.printStackTrace();
-                    }
-                    finally
-                    {
-                        closeProgressDialog(this);
-                    }
-                }).start();
+                requestCalendar();
                 break;
 
             default:
@@ -121,95 +103,164 @@ public class MainActivity extends AppCompatActivity
     public void listAvaliacoes(View v)
     { loadPreviousCalendar(false);}
 
-    private void loadPreviousCalendar(boolean isAulas)
+    private void showResults(boolean isAulas)
     {
-        new Thread(()->
-        {
-            try
-            {
-                openProgressDialog(this, LOADING_MESSAGE);
+        openProgressDialog(this, LOADING_MESSAGE);
 
-                if (lastNr == -1 || lastNr != Integer.parseInt(field.getText()+""))
-                {
-                    tRequestCalendar = new RequestThread();
-                    tRequestCalendar.start();
-                    tRequestCalendar.join();
-                    tRequestCalendar.checkForException();
-                }
+        Intent i = new Intent(this, ResultsActivity.class);
+        i.putExtra("isAulas", isAulas);
+        startActivity(i);
 
-                Intent i = new Intent(this, ResultsActivity.class);
-                i.putExtra("isAulas", isAulas);
-                startActivity(i);
-            }
-            catch(IOException | InterruptedException e)
-            {
-                closeProgressDialog(this);
-                toast(this,ERROR_MESSAGE);
-                e.printStackTrace();
-            }
-        }).start();
+        closeProgressDialog(this);
     }
 
-    private class RequestThread extends Thread
+    private void requestCalendar(StringRequestListener listener)
     {
-        private IOException exception;
-
-        @Override
-        public void run()
+        if (field.getText().length() == 0)
         {
-            try
+            toast(this, ERROR_MESSAGE);
+        }
+        else
+        {
+            openProgressDialog(this,PROGRESS_MESSAGE);
+
+            AndroidNetworking.get(CALENDAR_URL + field.getText())
+                    .setPriority(Priority.MEDIUM)
+                    .build()
+                    .getAsString(listener);
+        }
+    }
+
+    private void requestCalendar()
+    {
+        MainActivity self = this;
+
+        requestCalendar(new StringRequestListener()
+        {
+            @Override
+            public void onResponse(String events)
             {
-                if (field.getText().length() == 0) throw new IOException();
-
-                InputStream is = new URL(CALENDAR_URL + field.getText()).openStream();
-                Scanner s = new Scanner(is).useDelimiter("\\A");
-                String events = s.hasNext() ? s.next() : "";
-
                 Date today = Calendar.getInstance().getTime();
                 ICalendar ical = Biweekly.parse(events).first();
 
                 ArrayList<VEvent> eventsList = new ArrayList<>(ical.getEvents());
-                Collections.sort(eventsList,(a, b) -> a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
+                Collections.sort(eventsList, (a, b) -> a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
 
                 ICalendar aulas = new ICalendar();
                 ICalendar avaliacoes = new ICalendar();
 
-                for(VEvent e : eventsList)
+                for (VEvent e : eventsList)
                 {
                     Date eventDate = e.getDateStart().getValue();
-                    if(!today.before(eventDate)) continue;
+                    if (!today.before(eventDate)) continue;
 
-                    if(e.getSummary().getValue().contains("Avaliação")) avaliacoes.addEvent(e);
+                    if (e.getSummary().getValue().contains("Avaliação"))
+                        avaliacoes.addEvent(e);
                     else aulas.addEvent(e);
                 }
 
                 String strAulas = Biweekly.write(aulas).go();
                 String strAvaliacoes = Biweekly.write(avaliacoes).go();
 
-                lastNr = Integer.parseInt(field.getText()+"");
+                lastNr = Integer.parseInt(field.getText() + "");
                 prefs.setString(
-                        Prefs.FILE_MISC+"",
-                        Prefs.KEY_AULAS+"",
+                        Prefs.FILE_MISC + "",
+                        Prefs.KEY_AULAS + "",
                         strAulas);
                 prefs.setString(
-                        Prefs.FILE_MISC+"",
-                        Prefs.KEY_AVALIACOES+"",
+                        Prefs.FILE_MISC + "",
+                        Prefs.KEY_AVALIACOES + "",
                         strAvaliacoes);
                 prefs.setInt(
-                        Prefs.FILE_MISC+"",
-                        Prefs.KEY_LASTNR+"",
+                        Prefs.FILE_MISC + "",
+                        Prefs.KEY_LASTNR + "",
                         lastNr);
-            }
-            catch (IOException e)
-            {
-                exception = e;
-                e.printStackTrace();
-            }
-        }
 
-        private void checkForException() throws IOException
+                closeProgressDialog(self);
+            }
+
+            @Override
+            public void onError(ANError anError)
+            {
+                closeProgressDialog(self);
+
+                toast(self, ERROR_MESSAGE);
+            }
+        });
+    }
+
+    private void requestCalendar(boolean isAulas)
+    {
+        MainActivity self = this;
+
+        requestCalendar(new StringRequestListener()
         {
-            if(exception != null) throw exception;
-        }
+            @Override
+            public void onResponse(String events)
+            {
+                Date today = Calendar.getInstance().getTime();
+                ICalendar ical = Biweekly.parse(events).first();
+
+                ArrayList<VEvent> eventsList = new ArrayList<>(ical.getEvents());
+                Collections.sort(eventsList, (a, b) -> a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
+
+                ICalendar aulas = new ICalendar();
+                ICalendar avaliacoes = new ICalendar();
+
+                for (VEvent e : eventsList)
+                {
+                    Date eventDate = e.getDateStart().getValue();
+                    if (!today.before(eventDate)) continue;
+
+                    if (e.getSummary().getValue().contains("Avaliação"))
+                        avaliacoes.addEvent(e);
+                    else aulas.addEvent(e);
+                }
+
+                String strAulas = Biweekly.write(aulas).go();
+                String strAvaliacoes = Biweekly.write(avaliacoes).go();
+
+                lastNr = Integer.parseInt(field.getText() + "");
+                prefs.setString(
+                        Prefs.FILE_MISC + "",
+                        Prefs.KEY_AULAS + "",
+                        strAulas);
+                prefs.setString(
+                        Prefs.FILE_MISC + "",
+                        Prefs.KEY_AVALIACOES + "",
+                        strAvaliacoes);
+                prefs.setInt(
+                        Prefs.FILE_MISC + "",
+                        Prefs.KEY_LASTNR + "",
+                        lastNr);
+
+                closeProgressDialog(self);
+
+                showResults(isAulas);
+            }
+
+            @Override
+            public void onError(ANError anError)
+            {
+                closeProgressDialog(self);
+
+                toast(self, ERROR_MESSAGE);
+            }
+        });
+    }
+
+    private void loadPreviousCalendar(boolean isAulas)
+    {
+        new Thread(()->
+        {
+            if (lastNr == -1 || lastNr != Integer.parseInt(field.getText()+""))
+            {
+                requestCalendar(isAulas);
+            }
+            else
+            {
+                showResults(isAulas);
+            }
+        }).start();
     }
 }

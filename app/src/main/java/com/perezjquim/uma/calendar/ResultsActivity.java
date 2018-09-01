@@ -10,8 +10,6 @@ import com.perezjquim.SharedPreferencesHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
