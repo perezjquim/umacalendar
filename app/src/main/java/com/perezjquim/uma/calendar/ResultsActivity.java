@@ -10,6 +10,8 @@ import com.perezjquim.SharedPreferencesHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
@@ -55,8 +57,13 @@ public class ResultsActivity extends AppCompatActivity
             ICalendar ical = Biweekly.parse(s).first();
             ArrayList<VEvent> events = new ArrayList<>(ical.getEvents());
 
+            Date today = Calendar.getInstance().getTime();
+
             for (VEvent e : events)
             {
+                Date eventDate = e.getDateStart().getValue();
+                if (!today.before(eventDate)) continue;
+
                 // "Engenharia de Requisitos"
                 String cadeira = e.getSummary().getValue();
 
