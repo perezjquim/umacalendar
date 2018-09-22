@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity
     {
         Date now = Calendar.getInstance().getTime();
 
-        ArrayList<VEvent> events = (ArrayList<VEvent>) ical.getEvents();
+        ArrayList<VEvent> events = new ArrayList<>(ical.getEvents());
         Iterator<VEvent> iterator = events.iterator();
         Collections.sort(events,
                 (a, b) -> a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));

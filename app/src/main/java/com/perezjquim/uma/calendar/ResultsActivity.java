@@ -72,7 +72,7 @@ public class ResultsActivity extends AppCompatActivity
 
     private void filterCalendar(ICalendar ical, boolean isAulas)
     {
-        ArrayList<VEvent> events = (ArrayList<VEvent>) ical.getEvents();
+        ArrayList<VEvent> events = new ArrayList<>(ical.getEvents());
         int initialSize = events.size();
         Iterator<VEvent> iterator = events.iterator();
 
