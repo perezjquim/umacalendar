@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
@@ -140,42 +141,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onResponse(String events)
             {
-                Date today = Calendar.getInstance().getTime();
                 ICalendar ical = Biweekly.parse(events).first();
-
-                ArrayList<VEvent> eventsList = new ArrayList<>(ical.getEvents());
-                Collections.sort(eventsList, (a, b) -> a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
-
-                ICalendar aulas = new ICalendar();
-                ICalendar avaliacoes = new ICalendar();
-
-                for (VEvent e : eventsList)
-                {
-                    Date eventDate = e.getDateStart().getValue();
-                    if (!today.before(eventDate)) continue;
-
-                    if (e.getSummary().getValue().contains("Avaliação"))
-                        avaliacoes.addEvent(e);
-                    else aulas.addEvent(e);
-                }
-
-                String strAulas = Biweekly.write(aulas).go();
-                String strAvaliacoes = Biweekly.write(avaliacoes).go();
-
-                lastNr = Integer.parseInt(field.getText() + "");
-                prefs.setString(
-                        Prefs.FILE_MISC + "",
-                        Prefs.KEY_AULAS + "",
-                        strAulas);
-                prefs.setString(
-                        Prefs.FILE_MISC + "",
-                        Prefs.KEY_AVALIACOES + "",
-                        strAvaliacoes);
-                prefs.setInt(
-                        Prefs.FILE_MISC + "",
-                        Prefs.KEY_LASTNR + "",
-                        lastNr);
-
+                filterCalendar(ical);
                 closeProgressDialog(self);
             }
 
@@ -183,7 +150,6 @@ public class MainActivity extends AppCompatActivity
             public void onError(ANError anError)
             {
                 closeProgressDialog(self);
-
                 toast(self, ERROR_MESSAGE);
             }
         });
@@ -198,44 +164,9 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onResponse(String events)
             {
-                Date today = Calendar.getInstance().getTime();
                 ICalendar ical = Biweekly.parse(events).first();
-
-                ArrayList<VEvent> eventsList = new ArrayList<>(ical.getEvents());
-                Collections.sort(eventsList, (a, b) -> a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
-
-                ICalendar aulas = new ICalendar();
-                ICalendar avaliacoes = new ICalendar();
-
-                for (VEvent e : eventsList)
-                {
-                    Date eventDate = e.getDateStart().getValue();
-                    if (!today.before(eventDate)) continue;
-
-                    if (e.getSummary().getValue().contains("Avaliação"))
-                        avaliacoes.addEvent(e);
-                    else aulas.addEvent(e);
-                }
-
-                String strAulas = Biweekly.write(aulas).go();
-                String strAvaliacoes = Biweekly.write(avaliacoes).go();
-
-                lastNr = Integer.parseInt(field.getText() + "");
-                prefs.setString(
-                        Prefs.FILE_MISC + "",
-                        Prefs.KEY_AULAS + "",
-                        strAulas);
-                prefs.setString(
-                        Prefs.FILE_MISC + "",
-                        Prefs.KEY_AVALIACOES + "",
-                        strAvaliacoes);
-                prefs.setInt(
-                        Prefs.FILE_MISC + "",
-                        Prefs.KEY_LASTNR + "",
-                        lastNr);
-
+                filterCalendar(ical);
                 closeProgressDialog(self);
-
                 showResults(isAulas);
             }
 
@@ -243,7 +174,6 @@ public class MainActivity extends AppCompatActivity
             public void onError(ANError anError)
             {
                 closeProgressDialog(self);
-
                 toast(self, ERROR_MESSAGE);
             }
         });
@@ -262,5 +192,53 @@ public class MainActivity extends AppCompatActivity
                 showResults(isAulas);
             }
         }).start();
+    }
+
+    private void filterCalendar(ICalendar ical)
+    {
+        Date now = Calendar.getInstance().getTime();
+
+        ArrayList<VEvent> events = (ArrayList<VEvent>) ical.getEvents();
+        Iterator<VEvent> iterator = events.iterator();
+        Collections.sort(events,
+                (a, b) -> a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
+
+        ICalendar aulas = new ICalendar();
+        ICalendar avaliacoes = new ICalendar();
+
+        while(iterator.hasNext())
+        {
+            VEvent event = iterator.next();
+            Date eventDate = event.getDateEnd().getValue();
+
+            if(!now.before(eventDate))
+            {
+                iterator.remove();
+            }
+            else
+            {
+                if (event.getSummary().getValue().contains("Avaliação"))
+                    avaliacoes.addEvent(event);
+                else
+                    aulas.addEvent(event);
+            }
+        }
+
+        String strAulas = Biweekly.write(aulas).go();
+        String strAvaliacoes = Biweekly.write(avaliacoes).go();
+
+        lastNr = Integer.parseInt(field.getText() + "");
+        prefs.setString(
+                Prefs.FILE_MISC + "",
+                Prefs.KEY_AULAS + "",
+                strAulas);
+        prefs.setString(
+                Prefs.FILE_MISC + "",
+                Prefs.KEY_AVALIACOES + "",
+                strAvaliacoes);
+        prefs.setInt(
+                Prefs.FILE_MISC + "",
+                Prefs.KEY_LASTNR + "",
+                lastNr);
     }
 }

@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
@@ -19,6 +20,7 @@ import biweekly.component.VEvent;
 
 import static com.perezjquim.UIHelper.closeProgressDialog;
 import static com.perezjquim.UIHelper.openProgressDialog;
+import static com.perezjquim.UIHelper.toast;
 
 public class ResultsActivity extends AppCompatActivity
 {
@@ -55,45 +57,76 @@ public class ResultsActivity extends AppCompatActivity
                     Prefs.KEY_AVALIACOES+"");
 
             ICalendar ical = Biweekly.parse(s).first();
-            ArrayList<VEvent> events = new ArrayList<>(ical.getEvents());
+            filterCalendar(ical, isAulas);
 
-            Date today = Calendar.getInstance().getTime();
-
-            for (VEvent e : events)
+            int size = ical.getEvents().size();
+            if(size < 1)
             {
-                Date eventDate = e.getDateStart().getValue();
-                if (!today.before(eventDate)) continue;
-
-                // "Engenharia de Requisitos"
-                String cadeira = e.getSummary().getValue();
-
-                // "Sala de aula nº 5 -> TP2 (Sandra Mendonça)"
-                // { "Sala de aula nº 5" , "TP2 (Sandra Mendonça)" }
-                String[] info = e.getLocation().getValue().split(" -> ");
-
-                // "Sala de aula nº 5"
-                String sala = info[0];
-
-                // { "TP2" , "Sandra Mendonça" }
-                info = info[1].split("[()]");
-
-                // "TP2"
-                String tipo = info[0];
-
-                // "Sandra Mendonça"
-                String prof = info[1];
-
-                String date = dateFormatter.format(e.getDateStart().getValue());
-                String start = timeFormatter.format(e.getDateStart().getValue());
-                String end = timeFormatter.format(e.getDateEnd().getValue());
-
-                EventView out = new EventView(this, cadeira, tipo, prof, sala, date, start, end);
-
-                runOnUiThread(() -> lay.addView(out));
+                toast(this,((isAulas) ? "Aulas" : "Avaliações") + " inexistentes!" );
             }
 
             closeProgressDialog(this);
 
         }).start();
+    }
+
+    private void filterCalendar(ICalendar ical, boolean isAulas)
+    {
+        ArrayList<VEvent> events = (ArrayList<VEvent>) ical.getEvents();
+        int initialSize = events.size();
+        Iterator<VEvent> iterator = events.iterator();
+
+        Date now = Calendar.getInstance().getTime();
+
+        while(iterator.hasNext())
+        {
+            VEvent event = iterator.next();
+            Date eventDate = event.getDateEnd().getValue();
+            if(!now.before(eventDate)) iterator.remove();
+            else showEvent(event);
+        }
+
+        if(events.size() < initialSize)
+        {
+            String s = Biweekly.write(ical).go();
+            if(isAulas) prefs.setString(
+                    Prefs.FILE_MISC + "",
+                    Prefs.KEY_AULAS + "",
+                    s);
+            else prefs.setString(
+                    Prefs.FILE_MISC + "",
+                    Prefs.KEY_AVALIACOES + "",
+                    s);
+        }
+    }
+
+    private void showEvent(VEvent event)
+    {
+        // "Engenharia de Requisitos"
+        String cadeira = event.getSummary().getValue();
+
+        // "Sala de aula nº 5 -> TP2 (Sandra Mendonça)"
+        // { "Sala de aula nº 5" , "TP2 (Sandra Mendonça)" }
+        String[] info = event.getLocation().getValue().split(" -> ");
+
+        // "Sala de aula nº 5"
+        String sala = info[0];
+
+        // { "TP2" , "Sandra Mendonça" }
+        info = info[1].split("[()]");
+
+        // "TP2"
+        String tipo = info[0];
+
+        // "Sandra Mendonça"
+        String prof = info[1];
+
+        String date = dateFormatter.format(event.getDateStart().getValue());
+        String start = timeFormatter.format(event.getDateStart().getValue());
+        String end = timeFormatter.format(event.getDateEnd().getValue());
+
+        EventView out = new EventView(this, cadeira, tipo, prof, sala, date, start, end);
+
+        runOnUiThread(() -> lay.addView(out));
     }
 }
