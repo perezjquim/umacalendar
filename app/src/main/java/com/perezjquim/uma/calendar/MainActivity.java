@@ -108,9 +108,29 @@ public class MainActivity extends AppCompatActivity
     {
         openProgressDialog(this, LOADING_MESSAGE);
 
-        Intent i = new Intent(this, ResultsActivity.class);
-        i.putExtra("isAulas", isAulas);
-        startActivity(i);
+        String s;
+        if(isAulas) s = prefs.getString(
+                Prefs.FILE_MISC+"",
+                Prefs.KEY_AULAS+"");
+        else s = prefs.getString(
+                Prefs.FILE_MISC+"",
+                Prefs.KEY_AVALIACOES+"");
+
+        ICalendar ical = Biweekly.parse(s).first();
+        filterCalendar(ical, isAulas);
+
+        int size = ical.getEvents().size();
+
+        if(size < 1)
+        {
+            toast(this,((isAulas) ? "Aulas" : "Avaliações") + " inexistentes!" );
+        }
+        else
+        {
+            Intent i = new Intent(this, ResultsActivity.class);
+            i.putExtra("isAulas", isAulas);
+            startActivity(i);
+        }
 
         closeProgressDialog(this);
     }
@@ -240,5 +260,34 @@ public class MainActivity extends AppCompatActivity
                 Prefs.FILE_MISC + "",
                 Prefs.KEY_LASTNR + "",
                 lastNr);
+    }
+
+    private void filterCalendar(ICalendar ical, boolean isAulas)
+    {
+        ArrayList<VEvent> events = new ArrayList<>(ical.getEvents());
+        int initialSize = events.size();
+        Iterator<VEvent> iterator = new ArrayList<>(events).iterator();
+
+        Date now = Calendar.getInstance().getTime();
+
+        while(iterator.hasNext())
+        {
+            VEvent event = iterator.next();
+            Date eventDate = event.getDateEnd().getValue();
+            if(!now.before(eventDate)) iterator.remove();
+        }
+
+        if(events.size() < initialSize)
+        {
+            String s = Biweekly.write(ical).go();
+            if(isAulas) prefs.setString(
+                    Prefs.FILE_MISC + "",
+                    Prefs.KEY_AULAS + "",
+                    s);
+            else prefs.setString(
+                    Prefs.FILE_MISC + "",
+                    Prefs.KEY_AVALIACOES + "",
+                    s);
+        }
     }
 }

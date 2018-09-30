@@ -74,7 +74,7 @@ public class ResultsActivity extends AppCompatActivity
     {
         ArrayList<VEvent> events = new ArrayList<>(ical.getEvents());
         int initialSize = events.size();
-        Iterator<VEvent> iterator = events.iterator();
+        Iterator<VEvent> iterator = new ArrayList<>(events).iterator();
 
         Date now = Calendar.getInstance().getTime();
 
