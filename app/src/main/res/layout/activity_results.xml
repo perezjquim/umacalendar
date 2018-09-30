@@ -9,6 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:divider="?android:listDivider"
+        android:showDividers="middle"
+        android:dividerPadding="20dp"
         android:layout_gravity="center_horizontal"
         android:id="@+id/lay"
         android:padding="10dp" />
