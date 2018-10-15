@@ -9,10 +9,6 @@ import android.widget.LinearLayout;
 import com.perezjquim.SharedPreferencesHelper;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
 
 import biweekly.Biweekly;
 import biweekly.ICalendar;
@@ -20,7 +16,6 @@ import biweekly.component.VEvent;
 
 import static com.perezjquim.UIHelper.closeProgressDialog;
 import static com.perezjquim.UIHelper.openProgressDialog;
-import static com.perezjquim.UIHelper.toast;
 
 public class ResultsActivity extends AppCompatActivity
 {
@@ -57,47 +52,13 @@ public class ResultsActivity extends AppCompatActivity
                     Prefs.KEY_AVALIACOES+"");
 
             ICalendar ical = Biweekly.parse(s).first();
-            filterCalendar(ical, isAulas);
-
-            int size = ical.getEvents().size();
-            if(size < 1)
+            for(VEvent e : ical.getEvents())
             {
-                toast(this,((isAulas) ? "Aulas" : "Avaliações") + " inexistentes!" );
+                showEvent(e);
             }
 
             closeProgressDialog(this);
-
         }).start();
-    }
-
-    private void filterCalendar(ICalendar ical, boolean isAulas)
-    {
-        ArrayList<VEvent> events = new ArrayList<>(ical.getEvents());
-        int initialSize = events.size();
-        Iterator<VEvent> iterator = new ArrayList<>(events).iterator();
-
-        Date now = Calendar.getInstance().getTime();
-
-        while(iterator.hasNext())
-        {
-            VEvent event = iterator.next();
-            Date eventDate = event.getDateEnd().getValue();
-            if(!now.before(eventDate)) iterator.remove();
-            else showEvent(event);
-        }
-
-        if(events.size() < initialSize)
-        {
-            String s = Biweekly.write(ical).go();
-            if(isAulas) prefs.setString(
-                    Prefs.FILE_MISC + "",
-                    Prefs.KEY_AULAS + "",
-                    s);
-            else prefs.setString(
-                    Prefs.FILE_MISC + "",
-                    Prefs.KEY_AVALIACOES + "",
-                    s);
-        }
     }
 
     private void showEvent(VEvent event)

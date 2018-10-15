@@ -33,9 +33,10 @@ public class MainActivity extends AppCompatActivity
     private TextView field;
     private SharedPreferencesHelper prefs;
     private int lastNr;
-    private static final String PROGRESS_MESSAGE = "Obtendo calendário..";
+    private static final String PROGRESS_MESSAGE = "Baixando calendário..";
     private static final String LOADING_MESSAGE = "Carregando calendário..";
-    private static final String ERROR_MESSAGE = "Número mecanográfico inválido ou falta de conectividade!";
+    private static final String ERROR_NETWORK_MESSAGE = "Falha na conectividade!";
+    private static final String ERROR_NMEC_MESSAGE = "Número mecanográfico inválido!";
     private static final String CALENDAR_URL = "http://calendar.uma.pt/";
 
     @Override
@@ -139,7 +140,7 @@ public class MainActivity extends AppCompatActivity
     {
         if (field.getText().length() == 0)
         {
-            toast(this, ERROR_MESSAGE);
+            toast(this, ERROR_NMEC_MESSAGE);
         }
         else
         {
@@ -169,8 +170,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onError(ANError anError)
             {
-                closeProgressDialog(self);
-                toast(self, ERROR_MESSAGE);
+          		self.handleError(anError);
             }
         });
     }
@@ -193,8 +193,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onError(ANError anError)
             {
-                closeProgressDialog(self);
-                toast(self, ERROR_MESSAGE);
+                self.handleError(anError);
             }
         });
     }
@@ -219,9 +218,8 @@ public class MainActivity extends AppCompatActivity
         Date now = Calendar.getInstance().getTime();
 
         ArrayList<VEvent> events = new ArrayList<>(ical.getEvents());
+        Collections.sort(events, (a, b) -> a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
         Iterator<VEvent> iterator = new ArrayList<>(events).iterator();
-        Collections.sort(events,
-                (a, b) -> a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
 
         ICalendar aulas = new ICalendar();
         ICalendar avaliacoes = new ICalendar();
@@ -265,6 +263,8 @@ public class MainActivity extends AppCompatActivity
     private void filterCalendar(ICalendar ical, boolean isAulas)
     {
         ArrayList<VEvent> events = new ArrayList<>(ical.getEvents());
+        Collections.sort(events, (a, b) -> a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
+
         int initialSize = events.size();
         Iterator<VEvent> iterator = new ArrayList<>(events).iterator();
 
@@ -288,6 +288,19 @@ public class MainActivity extends AppCompatActivity
                     Prefs.FILE_MISC + "",
                     Prefs.KEY_AVALIACOES + "",
                     s);
+        }
+    }
+
+    private void handleError(ANError anError)
+    {
+        closeProgressDialog(this);
+        if(anError.getErrorCode() == 500)
+        {
+            toast(this, ERROR_NMEC_MESSAGE);
+        }
+        else
+        {
+            toast(this,ERROR_NETWORK_MESSAGE);
         }
     }
 }
