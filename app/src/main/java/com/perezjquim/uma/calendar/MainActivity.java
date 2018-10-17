@@ -229,11 +229,7 @@ public class MainActivity extends AppCompatActivity
             VEvent event = iterator.next();
             Date eventDate = event.getDateEnd().getValue();
 
-            if(!now.before(eventDate))
-            {
-                iterator.remove();
-            }
-            else
+            if(now.before(eventDate))
             {
                 if (event.getSummary().getValue().contains("Avaliação"))
                     avaliacoes.addEvent(event);
@@ -266,7 +262,7 @@ public class MainActivity extends AppCompatActivity
         Collections.sort(events, (a, b) -> a.getDateStart().getValue().compareTo(b.getDateStart().getValue()));
 
         int initialSize = events.size();
-        Iterator<VEvent> iterator = new ArrayList<>(events).iterator();
+        Iterator<VEvent> iterator = events.iterator();
 
         Date now = Calendar.getInstance().getTime();
 
@@ -279,6 +275,10 @@ public class MainActivity extends AppCompatActivity
 
         if(events.size() < initialSize)
         {
+            ical = new ICalendar();
+            for(VEvent e : events)
+                ical.addEvent(e);
+
             String s = Biweekly.write(ical).go();
             if(isAulas) prefs.setString(
                     Prefs.FILE_MISC + "",
