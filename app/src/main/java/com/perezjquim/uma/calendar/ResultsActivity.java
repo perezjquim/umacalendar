@@ -57,6 +57,15 @@ public class ResultsActivity extends AppCompatActivity
                 showEvent(e);
             }
 
+            try
+            {
+                Thread.sleep(250);
+            }
+            catch(InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+
             closeProgressDialog(this);
         }).start();
     }
